@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>拖动滚动</title>
+    <!--<link rel="stylesheet" href="common.css">-->
+    <style>
+        /*公共样式*/
+        * { padding: 0; margin: 0; }
+        * { -webkit-tap-highlight-color: rgba(0,0,0,0); -webkit-box-sizing: border-box; box-sizing: border-box; -webkit-appearance: none; }
+        body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input, textarea, p, blockquote, th, td { margin: 0; padding: 0; }
+        html { max-width: 640px; }
+        body { -webkit-text-size-adjust: none; word-wrap: break-word; min-width: 320px; max-width: 640px; margin: 0 auto; background: #f3f6ff; color: #7e879d; }
+        h1, h2, h3, h4, h5, h6 { font-size: 1em; font-weight: normal; }
+        a { text-decoration: none; color: #7e879d; }
+        a:active { color: #7e879d; }
+        li { list-style: none; }
+        img { border: 0; width: 100%; display: block; }
+        i, em, b { font-style: normal; font-weight: normal; }
+        input, textarea { outline: none; }
+
+        .clearfix:before, .clearfix:after { content: ""; display: block; }
+        .clearfix:after { clear: both; }
+
+        .fl { float: left; }
+        .fr { float: right; }
+
+        /*body { background: #ef1a4b; }*/
+        /*拍卖活动*/
+        .paimai-activity { width: 16.53125rem; margin: 2.8125rem auto 0; }
+        .paimai-activity .paimai-title { width: 6rem; height: 1.6rem; margin: 0 auto; background: url("images/paimai-title-bj_12.png") no-repeat; background-size: 100% 100%; font-size: .8125rem; color: #fff; text-align: center; line-height: 2rem; font-weight: bold; }
+        .paimai-activity ul { position: relative; text-align: center; }
+        .paimai-activity li { height: 1.5rem; line-height: 1.5rem; font-size: 0; }
+        .paimai-activity li span { font-size: .75rem; vertical-align: middle; }
+        .paimai-activity li img { margin-right: .25rem; width: 1rem; display: inline-block; vertical-align: middle; }
+
+        .scroll-area { position: relative; width: 13rem; height: 8.4rem; margin: 0 auto; border: .4rem solid #dd0234; border-radius: .5rem; background: #fde7e9; overflow: hidden; }
+        .scroll-container { position: relative; }
+        .scroll-container ul { position: relative; padding: 0; text-align: center; z-index: 1; }
+        .scroll-container ul li { line-height: 1.4rem; height: 1.4rem; }
+        .scroll-area .select-line { width: 100%; height: 1.4rem; box-sizing: border-box; border: 1px solid #f00; border-left: 0; border-right: 0; position: absolute; top: 50%; margin-top: -.9rem; }
+
+    </style>
+</head>
+<body>
+<!--拍卖活动-->
+<div class="paimai-activity">
+    <div class="paimai-title">
+        拍卖内容
+    </div>
+    <div class="scroll-area">
+        <div class="scroll-container">
+            <ul>
+                <li class="first">
+                    <img class="good" src="images/mi-phone_17.png">
+                    <span>小米5s 128G(金色)</span>
+                </li>
+                <li class="second">
+                    <img class="good" src="images/mi-phone_17.png">
+                    <span>iphone7 128G(亮黑)</span>
+                </li>
+                <li class="third">
+                    <img class="good" src="images/mi-phone_17.png">
+                    <span>iphone7 plus 128G(亮黑)</span>
+                </li>
+                <li class="second">
+                    <img class="good" src="images/mi-phone_17.png">
+                    <span>Beats urBeats入耳式耳机</span>
+                </li>
+                <li>
+                    <img class="good" src="images/mi-phone_17.png">
+                    <span>Beats EP头戴款式运动耳机</span>
+                </li>
+                <li class="first">
+                    <img class="good" src="images/mi-phone_17.png">
+                    <span>小米5s 128G(金色)</span>
+                </li>
+                <li class="second">
+                    <img class="good" src="images/mi-phone_17.png">
+                    <span>iphone7 128G(亮黑)</span>
+                </li>
+                <li class="third">
+                    <img class="good" src="images/mi-phone_17.png">
+                    <span>iphone7 plus 128G(亮黑)</span>
+                </li>
+                <li class="second">
+                    <img class="good" src="images/mi-phone_17.png">
+                    <span>Beats urBeats入耳式耳机</span>
+                </li>
+                <li>
+                    <img class="good" src="images/mi-phone_17.png">
+                    <span>Beats EP头戴款式运动耳机</span>
+                </li>
+            </ul>
+        </div>
+        <div class="select-line"></div>
+    </div>
+</div>
+<script>
+    (function (doc, win) {
+        // 控制body元素根据页面宽度变化 font-size值随之改变
+        var docEl = doc.documentElement,
+                resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+                recalc = function () {
+                    var clientWidth = docEl.clientWidth;
+                    if (!clientWidth) return;
+                    docEl.style.fontSize = 16 * (clientWidth / 320) + 'px';
+                };
+        if (!doc.addEventListener) return;
+        win.addEventListener(resizeEvt, recalc, false);
+        //doc.addEventListener('DOMContentLoaded', recalc, false);
+        recalc();
+
+    })(document, window);
+</script>
+<script src="jquery-1.8.3.min.js"></script>
+<script>
+    //拍卖内容
+    function FingerScrollItem(slideArea) {
+        var slideList = slideArea;
+        var slideListOri = slideList.get(0);
+        var curRem = parseFloat($('body').css('font-size')); // 当前font-size值
+        var lineHeight = 1.5;   // 行高
+        var scaleVal = 0.1;     // 在中央行时放大倍数
+        var singleLineHeight = lineHeight * curRem;     // 单行高度
+        var touchLineArr = [];      // 存储需要放大的元素实例
+        var touchLineRef = {};      // 存储每个元素实例所对应的高度
+
+
+        // 整体滚动区域边界
+        var slideListEdge = {
+            top: 0,
+            bottom: -slideList.height() + slideList.children(':last').height()
+        }
+
+
+        /*
+         *   构造函数
+         *   将每个需放大的元素实例化
+         */
+        var touchLine = function (li, index) {
+            this.index = index;
+            this.range = {
+                top: -li.position().top,
+                bottom: li.position().top + li.height(),
+                height: li.height()
+            }
+            this.target = li.get(0);
+            var doubleLineHeight = 2 * this.range.height;
+
+            this.setProperty = function (top) {
+                var lineOffset = Math.abs(top - this.range.top);
+                if (lineOffset < doubleLineHeight) {
+                    this.target.style.webkitTransform = 'scale(' + (((1 - lineOffset / doubleLineHeight) * scaleVal) + 1) + ')';
+                } else
+                    this.target.style.webkitTransform = 'scale(1)';
+            }
+        }
+
+
+        var listPositionTop = 0;    // 滚动区域的top值
+        var fingerOffsetTop = 0;    // 当手指触碰到整体滚动区域时的clientY
+        var isTouch = false;
+        var tempPositionVal = 0;    // 该值为计算结果 通过手指触碰到屏幕上下滑动 与 滚动区域当前偏移量 计算出当手指滑动时滚动区域实时与初始位置的位移
+        var touchExcute = function () {
+            slideListOri.addEventListener('touchstart', function (e) {
+                e.preventDefault();
+                isTouch = true;
+                listPositionTop = $(this).position().top;
+                fingerOffsetTop = e.changedTouches[0].clientY;
+            }, false);
+            slideListOri.addEventListener('touchend', function () {
+                isTouch = false;
+                var shortest = lineHeight * curRem;
+                var shortestIndex = 0;
+                if (tempPositionVal >= 0)
+                    slideListOri.style.top = 0;
+                else if (tempPositionVal <= slideListEdge.bottom)
+                    slideListOri.style.top = slideListEdge.bottom;
+                else {
+                    for (var i = 0; i < touchLineArr.length; i++) {
+                        if (Math.abs(tempPositionVal - touchLineArr[i].range.top) < shortest) {
+                            shortest = Math.abs(tempPositionVal - touchLineArr[i].range.top);
+                            shortestIndex = i;
+                        }
+                    }
+                    slideListOri.style.top = touchLineArr[shortestIndex].range.top + 'px';
+                }
+            }, false);
+            slideListOri.addEventListener('touchmove', function (e) {
+                if (isTouch) {
+                    var clientY = e.changedTouches[0].clientY;
+                    var touchOffsetVal = clientY - fingerOffsetTop;
+                    tempPositionVal = touchOffsetVal + listPositionTop;
+                    if (tempPositionVal <= slideListEdge.top && tempPositionVal >= slideListEdge.bottom) {
+                        slideListOri.style.top = tempPositionVal + 'px';
+                        ItemController(tempPositionVal);
+                    } else if (tempPositionVal > slideListEdge.top) {
+                        slideListOri.style.top = slideListEdge.top + 'px';
+                    } else if (tempPositionVal < slideListEdge.bottom) {
+                        slideListOri.style.top = slideListEdge.bottom + 'px'
+                    }
+                }
+            }, false);
+        }
+
+        function ItemController(top) {
+            for (var i = 0; i < touchLineArr.length; i++) {
+                touchLineArr[i].setProperty(top)
+            }
+        }
+
+        // 添加放大的元素实例
+        var AddInstance = function (jqueryTars) {
+            jqueryTars.each(function (i) {
+                touchLineArr.push(new touchLine($(this), i));
+                touchLineRef['li' + i] = $(this).height();
+            })
+        }
+
+        AddInstance(slideList.children())
+        slideList.parent().css('margin-top', 2 * lineHeight * curRem);
+
+        touchExcute();
+
+        function LocationItem(index) {
+            ItemController(-index * singleLineHeight);
+            slideListOri.style.top = -index * singleLineHeight + 'px';
+        }
+        LocationItem(2);
+    }
+    (function () {
+        FingerScrollItem($('.scroll-container ul'));
+    })();
+</script>
+</body>
+</html>
